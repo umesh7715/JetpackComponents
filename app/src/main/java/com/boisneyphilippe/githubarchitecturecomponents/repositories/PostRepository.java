@@ -1,13 +1,16 @@
 package com.boisneyphilippe.githubarchitecturecomponents.repositories;
 
 
-
 import android.arch.lifecycle.LiveData;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import com.boisneyphilippe.githubarchitecturecomponents.api.UserWebservice;
 import com.boisneyphilippe.githubarchitecturecomponents.api.WebAPIInterface;
 import com.boisneyphilippe.githubarchitecturecomponents.database.dao.PostDao;
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post;
+import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.ApiResponse;
+import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.NetworkBoundResource;
+import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.Resource;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -36,14 +39,12 @@ public class PostRepository {
     }
 
 
-
-
     public LiveData<List<Post>> getPosts() {
         refreshUser(); // try to refresh data if possible from Github Api
         return userDao.getPosts(); // return a LiveData directly from the database.
     }
 
-    private void refreshUser() {
+    private void refreshUserV3() {
         executor.execute(() -> {
 
             webservice.getPosts().enqueue(new Callback<List<Post>>() {
@@ -69,6 +70,38 @@ public class PostRepository {
             });
 
         });
+    }
+
+    public LiveData<Resource<List<Post>>> refreshUser() {
+
+        return new NetworkBoundResource<List<Post>, List<Post>>() {
+            @Override
+            protected void saveCallResult(@NonNull List<Post> item) {
+
+                for (Post post : item) {
+                    userDao.insertPost(post);
+                }
+            }
+
+            @Override
+            protected boolean shouldFetch(@Nullable List<Post> data) {
+                return false;
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<List<Post>> loadFromDb() {
+                return userDao.getPosts();
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<ApiResponse<List<Post>>> createCall() {
+                  //return webservice.getPosts();
+
+                return null;
+            }
+        }.getAsLiveData();
     }
 
 }

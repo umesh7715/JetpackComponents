@@ -1,6 +1,8 @@
 package com.boisneyphilippe.githubarchitecturecomponents.repositories;
 
 import android.arch.lifecycle.LiveData;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -8,6 +10,8 @@ import com.boisneyphilippe.githubarchitecturecomponents.App;
 import com.boisneyphilippe.githubarchitecturecomponents.api.UserWebservice;
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.User;
 import com.boisneyphilippe.githubarchitecturecomponents.database.dao.UserDao;
+import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.NetworkBoundResource;
+import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.Resource;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -73,6 +77,9 @@ public class UserRepository {
             }
         });
     }
+
+
+
 
     // ---
 
