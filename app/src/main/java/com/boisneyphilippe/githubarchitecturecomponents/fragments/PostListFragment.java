@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +42,11 @@ public class PostListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_post_list, container, false);
         binder = ButterKnife.bind(this, view);
 
-        initializePostList();
+        rvPosts.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        rvPosts.setLayoutManager(layoutManager);
+
+        //initializePostList();
 
         return view;
     }
@@ -83,6 +88,8 @@ public class PostListFragment extends Fragment {
 
     private void updateUI(List<Post> user) {
 
+        postAdapter = new PostAdapter(getActivity(),user);
+        rvPosts.setAdapter(postAdapter);
 
 
     }
