@@ -5,12 +5,15 @@ import android.arch.persistence.room.Room;
 
 import com.boisneyphilippe.githubarchitecturecomponents.api.UserWebservice;
 import com.boisneyphilippe.githubarchitecturecomponents.api.WebAPIInterface;
+import com.boisneyphilippe.githubarchitecturecomponents.clickHandler.PostClickHandler;
 import com.boisneyphilippe.githubarchitecturecomponents.database.MyDatabase;
 import com.boisneyphilippe.githubarchitecturecomponents.database.dao.PostDao;
 import com.boisneyphilippe.githubarchitecturecomponents.database.dao.UserDao;
 import com.boisneyphilippe.githubarchitecturecomponents.repositories.UserRepository;
+import com.boisneyphilippe.githubarchitecturecomponents.utils.LiveDataCallAdapterFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -73,6 +76,7 @@ public class AppModule {
     Retrofit provideRetrofit(Gson gson) {
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
+                .addCallAdapterFactory(new LiveDataCallAdapterFactory())
                 .baseUrl(BASE_URL_POST_LIST)
                 .build();
         return retrofit;

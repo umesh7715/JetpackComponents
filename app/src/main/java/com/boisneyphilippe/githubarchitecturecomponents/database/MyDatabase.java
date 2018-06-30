@@ -21,7 +21,7 @@ import com.boisneyphilippe.githubarchitecturecomponents.database.entity.User;
 public abstract class MyDatabase extends RoomDatabase {
 
     // --- SINGLETON ---
-    private static volatile MyDatabase INSTANCE;
+    public static volatile MyDatabase INSTANCE;
 
     // --- DAO ---
     public abstract UserDao userDao();

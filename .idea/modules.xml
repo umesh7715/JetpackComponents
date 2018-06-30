@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GithubArchitectureComponents.iml" filepath="$PROJECT_DIR$/GithubArchitectureComponents.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/JetpackComponents.iml" filepath="$PROJECT_DIR$/.idea/JetpackComponents.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

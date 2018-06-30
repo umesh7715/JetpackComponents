@@ -8,12 +8,15 @@ import android.support.annotation.Nullable;
 import com.boisneyphilippe.githubarchitecturecomponents.api.WebAPIInterface;
 import com.boisneyphilippe.githubarchitecturecomponents.database.dao.PostDao;
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post;
+import com.boisneyphilippe.githubarchitecturecomponents.executors.AppExecutors;
 import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.ApiResponse;
 import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.NetworkBoundResource;
 import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.Resource;
+import com.boisneyphilippe.githubarchitecturecomponents.utils.RateLimiter;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,23 +31,24 @@ public class PostRepository {
     private static int FRESH_TIMEOUT_IN_MINUTES = 3;
 
     private final WebAPIInterface webservice;
-    private final PostDao userDao;
-    private final Executor executor;
+    private final PostDao postDao;
+    private final AppExecutors executor;
+    private RateLimiter<String> repoListRateLimit = new RateLimiter<>(FRESH_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
 
     @Inject
-    public PostRepository(WebAPIInterface webservice, PostDao userDao, Executor executor) {
+    public PostRepository(WebAPIInterface webservice, PostDao userDao, AppExecutors executor) {
         this.webservice = webservice;
-        this.userDao = userDao;
+        this.postDao = userDao;
         this.executor = executor;
     }
 
 
-    public LiveData<List<Post>> getPosts() {
-        refreshUser(); // try to refresh data if possible from Github Api
-        return userDao.getPosts(); // return a LiveData directly from the database.
-    }
+    /*public LiveData<List<Post>> getPosts() {
+        refreshUser();
+        return postDao.getPosts();
+    }*/
 
-    private void refreshUserV3() {
+    /*private void refreshUserV3() {
         executor.execute(() -> {
 
             webservice.getPosts().enqueue(new Callback<List<Post>>() {
@@ -57,7 +61,7 @@ public class PostRepository {
                         List<Post> posts = response.body();
 
                         for (Post post : posts) {
-                            userDao.insertPost(post);
+                            postDao.insertPost(post);
                         }
 
 
@@ -79,7 +83,7 @@ public class PostRepository {
             protected void saveCallResult(@NonNull List<Post> item) {
 
                 for (Post post : item) {
-                    userDao.insertPost(post);
+                    postDao.insertPost(post);
                 }
             }
 
@@ -91,17 +95,81 @@ public class PostRepository {
             @NonNull
             @Override
             protected LiveData<List<Post>> loadFromDb() {
-                return userDao.getPosts();
+                return postDao.getPosts();
             }
 
             @NonNull
             @Override
             protected LiveData<ApiResponse<List<Post>>> createCall() {
-                  //return webservice.getPosts();
+                 // return webservice.getPosts();
 
                 return null;
             }
         }.getAsLiveData();
+    }*/
+
+    public LiveData<Resource<List<Post>>> getPosts(String owner) {
+        return new NetworkBoundResource<List<Post>, List<Post>>(executor) {
+            @Override
+            protected void saveCallResult(@NonNull List<Post> item) {
+                postDao.insertPosts(item);
+            }
+
+            @Override
+            protected boolean shouldFetch(@Nullable List<Post> data) {
+                return data == null || data.isEmpty() || repoListRateLimit.shouldFetch(owner);
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<List<Post>> loadFromDb() {
+                return postDao.getPosts();
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<ApiResponse<List<Post>>> createCall() {
+                return webservice.getPosts();
+            }
+
+            @Override
+            protected void onFetchFailed() {
+                repoListRateLimit.reset(owner);
+            }
+        }.asLiveData();
     }
+
+    public LiveData<Resource<Post>> getPost(String owner, long id) {
+
+        return new NetworkBoundResource<Post, Post>(executor) {
+            @Override
+            protected void saveCallResult(@NonNull Post item) {
+                postDao.insertPost(item);
+            }
+
+            @Override
+            protected boolean shouldFetch(@Nullable Post data) {
+                return data == null || repoListRateLimit.shouldFetch(owner);
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<Post> loadFromDb() {
+                return postDao.load(id);
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<ApiResponse<Post>> createCall() {
+                return webservice.getPost(id);
+            }
+
+            @Override
+            protected void onFetchFailed() {
+                repoListRateLimit.reset(owner);
+            }
+        }.asLiveData();
+    }
+
 
 }

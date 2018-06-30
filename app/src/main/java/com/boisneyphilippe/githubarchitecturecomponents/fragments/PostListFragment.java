@@ -1,5 +1,6 @@
 package com.boisneyphilippe.githubarchitecturecomponents.fragments;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import com.boisneyphilippe.githubarchitecturecomponents.PostAdapter;
 import com.boisneyphilippe.githubarchitecturecomponents.R;
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post;
+import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.Resource;
 import com.boisneyphilippe.githubarchitecturecomponents.view_models.PostListViewModel;
 import com.boisneyphilippe.githubarchitecturecomponents.view_models.UserProfileViewModel;
 
@@ -26,15 +29,16 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 
+import static android.support.constraint.Constraints.TAG;
+
 public class PostListFragment extends Fragment {
 
     @BindView(R.id.rvPosts)
     RecyclerView rvPosts;
-
-    private Unbinder binder;
-    private PostAdapter postAdapter;
     @Inject
     ViewModelProvider.Factory viewModelFactory;
+    private Unbinder binder;
+    private PostAdapter postAdapter;
     private PostListViewModel viewModel;
 
     @Override
@@ -62,7 +66,6 @@ public class PostListFragment extends Fragment {
     }
 
 
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -70,27 +73,29 @@ public class PostListFragment extends Fragment {
         this.configureViewModel();
     }
 
-    private void configureDagger(){
+    private void configureDagger() {
         AndroidSupportInjection.inject(this);
     }
 
-    private void configureViewModel(){
+    private void configureViewModel() {
 
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(PostListViewModel.class);
         viewModel.getPosts().observe(this, this::updateUI);
 
-       // viewModel1 = ViewModelProviders.of(this, viewModelFactory).get(UserProfileViewModel.class);
-       // viewModel1.getUser().observe(this, user -> updateUI(null));
-
-
-
-    }
-
-    private void updateUI(List<Post> user) {
-
-        postAdapter = new PostAdapter(getActivity(),user);
-        rvPosts.setAdapter(postAdapter);
+        // viewModel1 = ViewModelProviders.of(this, viewModelFactory).get(UserProfileViewModel.class);
+        // viewModel1.getUser().observe(this, user -> updateUI(null));
 
 
     }
+
+    private void updateUI(Resource<List<Post>> listResource) {
+
+        if (null != listResource.data) {
+            Log.e(TAG, listResource.data + " ZIse");
+            postAdapter = new PostAdapter(getActivity(), listResource.data);
+            rvPosts.setAdapter(postAdapter);
+        }
+    }
+
+
 }
