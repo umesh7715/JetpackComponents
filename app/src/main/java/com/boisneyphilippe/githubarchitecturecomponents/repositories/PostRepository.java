@@ -15,15 +15,10 @@ import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.Res
 import com.boisneyphilippe.githubarchitecturecomponents.utils.RateLimiter;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @Singleton
 public class PostRepository {
@@ -43,73 +38,8 @@ public class PostRepository {
     }
 
 
-    /*public LiveData<List<Post>> getPosts() {
-        refreshUser();
-        return postDao.getPosts();
-    }*/
-
-    /*private void refreshUserV3() {
-        executor.execute(() -> {
-
-            webservice.getPosts().enqueue(new Callback<List<Post>>() {
-                @Override
-                public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-
-                    // Toast.makeText(App.context, "Data refreshed from network !", Toast.LENGTH_LONG).show();
-
-                    executor.execute(() -> {
-                        List<Post> posts = response.body();
-
-                        for (Post post : posts) {
-                            postDao.insertPost(post);
-                        }
-
-
-                    });
-                }
-
-                @Override
-                public void onFailure(Call<List<Post>> call, Throwable t) {
-                }
-            });
-
-        });
-    }
-
-    public LiveData<Resource<List<Post>>> refreshUser() {
-
-        return new NetworkBoundResource<List<Post>, List<Post>>() {
-            @Override
-            protected void saveCallResult(@NonNull List<Post> item) {
-
-                for (Post post : item) {
-                    postDao.insertPost(post);
-                }
-            }
-
-            @Override
-            protected boolean shouldFetch(@Nullable List<Post> data) {
-                return false;
-            }
-
-            @NonNull
-            @Override
-            protected LiveData<List<Post>> loadFromDb() {
-                return postDao.getPosts();
-            }
-
-            @NonNull
-            @Override
-            protected LiveData<ApiResponse<List<Post>>> createCall() {
-                 // return webservice.getPosts();
-
-                return null;
-            }
-        }.getAsLiveData();
-    }*/
-
-    public LiveData<Resource<List<Post>>> getPosts(String owner) {
-        return new NetworkBoundResource<List<Post>, List<Post>>(executor) {
+    public LiveData<Resource<List<Post>>> getPostsWithDatabaseResource(String owner) {
+        return new NetworkBoundResource<List<Post>, List<Post>>(executor, true) {
             @Override
             protected void saveCallResult(@NonNull List<Post> item) {
                 postDao.insertPosts(item);
@@ -120,9 +50,8 @@ public class PostRepository {
                 return data == null || data.isEmpty() || repoListRateLimit.shouldFetch(owner);
             }
 
-            @NonNull
             @Override
-            protected LiveData<List<Post>> loadFromDb() {
+            protected LiveData<List<Post>> performDatabaseOperation() {
                 return postDao.getPosts();
             }
 
@@ -139,9 +68,10 @@ public class PostRepository {
         }.asLiveData();
     }
 
+
     public LiveData<Resource<Post>> getPost(String owner, long id) {
 
-        return new NetworkBoundResource<Post, Post>(executor) {
+        return new NetworkBoundResource<Post, Post>(executor, true) {
             @Override
             protected void saveCallResult(@NonNull Post item) {
                 postDao.insertPost(item);
@@ -154,7 +84,7 @@ public class PostRepository {
 
             @NonNull
             @Override
-            protected LiveData<Post> loadFromDb() {
+            protected LiveData<Post> performDatabaseOperation() {
                 return postDao.load(id);
             }
 
@@ -172,4 +102,12 @@ public class PostRepository {
     }
 
 
+    public LiveData<ApiResponse<List<Post>>> getPostsWithoutDatabaseResource() {
+        return webservice.getPosts();
+    }
+
+
+    public void updatePost(Post post) {
+        executor.networkIO().execute(() -> postDao.updatePost(post));
+    }
 }

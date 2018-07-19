@@ -45,6 +45,7 @@ public class Post extends BaseObservable {
         return id;
     }
 
+    @Bindable
     public String getTitle() {
         return title;
     }
@@ -74,10 +75,14 @@ public class Post extends BaseObservable {
 
     public void setTitle(String title) {
         this.title = title;
+        notifyPropertyChanged(BR.title);
+
 
     }
 
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+
+
 }

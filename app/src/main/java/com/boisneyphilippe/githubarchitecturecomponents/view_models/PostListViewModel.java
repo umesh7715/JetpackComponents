@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post;
+import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.ApiResponse;
 import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.Resource;
 import com.boisneyphilippe.githubarchitecturecomponents.repositories.PostRepository;
 
@@ -13,7 +14,6 @@ import javax.inject.Inject;
 
 public class PostListViewModel extends ViewModel {
 
-    private LiveData<List<Post>> posts;
     private PostRepository postRespository;
 
     @Inject
@@ -21,8 +21,16 @@ public class PostListViewModel extends ViewModel {
         this.postRespository = postRespository;
     }
 
-    public LiveData<Resource<List<Post>>> getPosts() {
-        return postRespository.getPosts("post");
+    public LiveData<Resource<List<Post>>> getPostsWithDatabaseResource() {
+        return postRespository.getPostsWithDatabaseResource("post");
     }
 
+    public LiveData<ApiResponse<List<Post>>> getPostsWithoutDatabaseResource() {
+        return postRespository.getPostsWithoutDatabaseResource();
+    }
+
+
+    public void updatePost(Post post) {
+        postRespository.updatePost(post);
+    }
 }

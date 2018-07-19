@@ -13,6 +13,7 @@ import com.boisneyphilippe.githubarchitecturecomponents.clickHandler.PostClickHa
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post;
 import com.boisneyphilippe.githubarchitecturecomponents.databinding.PostListRowBinding;
 import com.boisneyphilippe.githubarchitecturecomponents.fragments.PostListFragment_ViewBinding;
+import com.boisneyphilippe.githubarchitecturecomponents.view_models.PostListViewModel;
 
 import java.util.List;
 
@@ -23,11 +24,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
     private List<Post> posts;
     private LayoutInflater layoutInflater;
     private Activity activity;
+    private PostListViewModel postListViewModel;
 
-    public PostAdapter(Activity activity, List<Post> posts) {
+    public PostAdapter(Activity activity, List<Post> posts, PostListViewModel viewModel) {
 
         this.posts = posts;
         this.activity = activity;
+        this.postListViewModel = viewModel;
     }
 
     @Override
@@ -48,7 +51,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
     public void onBindViewHolder(MyViewHolder holder, int position) {
 
         holder.binding.setPost(posts.get(position));
-        PostClickHandler handlers = new PostClickHandler(activity);
+        PostClickHandler handlers = new PostClickHandler(activity,postListViewModel);
         holder.binding.setHandlers(handlers);
 
 

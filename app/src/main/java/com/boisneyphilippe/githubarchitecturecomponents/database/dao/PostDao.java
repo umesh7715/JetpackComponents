@@ -5,6 +5,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post;
@@ -27,4 +28,10 @@ public interface PostDao {
 
     @Query("SELECT * FROM post")
     LiveData<List<Post>> getPosts();
+
+    @Update(onConflict = REPLACE)
+    public void updatePost(Post post);
+
+
+
 }

@@ -1,18 +1,13 @@
 package com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
-import android.os.AsyncTask;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
-import android.util.Log;
 
 import com.boisneyphilippe.githubarchitecturecomponents.executors.AppExecutors;
-
-import retrofit2.Response;
 
 public abstract class NetworkBoundResource<ResultType, RequestType> {
     private final AppExecutors appExecutors;
@@ -20,10 +15,12 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
     private final MediatorLiveData<Resource<ResultType>> result = new MediatorLiveData<>();
 
     @MainThread
-    protected NetworkBoundResource(AppExecutors appExecutors) {
+    protected NetworkBoundResource(AppExecutors appExecutors, boolean isOnlyNetworkCall) {
         this.appExecutors = appExecutors;
         result.setValue(Resource.loading(null));
-        LiveData<ResultType> dbSource = loadFromDb();
+
+        LiveData<ResultType> dbSource = performDatabaseOperation();
+
         result.addSource(dbSource, data -> {
             result.removeSource(dbSource);
             if (shouldFetch(data)) {
@@ -49,7 +46,7 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
                             // we specially request a new live data,
                             // otherwise we will get immediately last cached value,
                             // which may not be updated with latest results received from network.
-                            result.addSource(loadFromDb(),
+                            result.addSource(performDatabaseOperation(),
                                     newData -> result.setValue(Resource.success(newData)))
                     );
                 });
@@ -81,7 +78,7 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
 
     @NonNull
     @MainThread
-    protected abstract  LiveData<ResultType> loadFromDb();
+    protected abstract  LiveData<ResultType> performDatabaseOperation();
 
     @NonNull
     @MainThread
