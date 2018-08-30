@@ -1,8 +1,6 @@
 package com.boisneyphilippe.githubarchitecturecomponents.repositories;
 
 import android.arch.lifecycle.LiveData;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -10,8 +8,7 @@ import com.boisneyphilippe.githubarchitecturecomponents.App;
 import com.boisneyphilippe.githubarchitecturecomponents.api.UserWebservice;
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.User;
 import com.boisneyphilippe.githubarchitecturecomponents.database.dao.UserDao;
-import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.NetworkBoundResource;
-import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.Resource;
+import com.boisneyphilippe.githubarchitecturecomponents.di.module.ExampleIntercepter;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -32,16 +29,24 @@ import retrofit2.Response;
 public class UserRepository {
 
     private static int FRESH_TIMEOUT_IN_MINUTES = 1;
-
+    private static String BASE_URL = "https://api.github.com/";
     private final UserWebservice webservice;
     private final UserDao userDao;
     private final Executor executor;
+    private ExampleIntercepter exampleIntercepter;
+
 
     @Inject
-    public UserRepository(UserWebservice webservice, UserDao userDao, Executor executor) {
+    public UserRepository(UserWebservice webservice, UserDao userDao, Executor executor, ExampleIntercepter exampleIntercepter) {
         this.webservice = webservice;
         this.userDao = userDao;
         this.executor = executor;
+        this.exampleIntercepter = exampleIntercepter;
+        setBaseURL();
+    }
+
+    private void setBaseURL() {
+        exampleIntercepter.setInterceptor(BASE_URL);
     }
 
     // ---
@@ -72,18 +77,17 @@ public class UserRepository {
                     }
 
                     @Override
-                    public void onFailure(Call<User> call, Throwable t) { }
+                    public void onFailure(Call<User> call, Throwable t) {
+                    }
                 });
             }
         });
     }
 
 
-
-
     // ---
 
-    private Date getMaxRefreshTime(Date currentDate){
+    private Date getMaxRefreshTime(Date currentDate) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(currentDate);
         cal.add(Calendar.MINUTE, -FRESH_TIMEOUT_IN_MINUTES);

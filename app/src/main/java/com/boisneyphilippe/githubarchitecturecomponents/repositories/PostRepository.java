@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import com.boisneyphilippe.githubarchitecturecomponents.api.WebAPIInterface;
 import com.boisneyphilippe.githubarchitecturecomponents.database.dao.PostDao;
 import com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post;
+import com.boisneyphilippe.githubarchitecturecomponents.di.module.ExampleIntercepter;
 import com.boisneyphilippe.githubarchitecturecomponents.executors.AppExecutors;
 import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.ApiResponse;
 import com.boisneyphilippe.githubarchitecturecomponents.networkBoundResource.NetworkBoundResource;
@@ -24,17 +25,26 @@ import javax.inject.Singleton;
 public class PostRepository {
 
     private static int FRESH_TIMEOUT_IN_MINUTES = 3;
-
+    private static String BASE_URL_POST_LIST = "https://jsonplaceholder.typicode.com/";
     private final WebAPIInterface webservice;
     private final PostDao postDao;
     private final AppExecutors executor;
     private RateLimiter<String> repoListRateLimit = new RateLimiter<>(FRESH_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
+    private ExampleIntercepter exampleIntercepter;
 
     @Inject
-    public PostRepository(WebAPIInterface webservice, PostDao userDao, AppExecutors executor) {
+    public PostRepository(WebAPIInterface webservice, PostDao userDao, AppExecutors executor, ExampleIntercepter exampleIntercepter) {
         this.webservice = webservice;
         this.postDao = userDao;
         this.executor = executor;
+
+        this.exampleIntercepter = exampleIntercepter;
+        setURL();
+
+    }
+
+    private void setURL() {
+        exampleIntercepter.setInterceptor(BASE_URL_POST_LIST);
     }
 
 
@@ -103,6 +113,7 @@ public class PostRepository {
 
 
     public LiveData<ApiResponse<List<Post>>> getPostsWithoutDatabaseResource() {
+
         return webservice.getPosts();
     }
 

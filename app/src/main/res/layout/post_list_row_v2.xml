@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="post"
+            type="com.boisneyphilippe.githubarchitecturecomponents.database.entity.Post" />
+
+        <variable
+            name="handlers"
+            type="com.boisneyphilippe.githubarchitecturecomponents.clickHandler.PostClickHandler" />
+
+        <import type="com.boisneyphilippe.githubarchitecturecomponents.bindingUtils.PostBindingUtils" />
+
+    </data>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{(v) -> handlers.onItemClickHandler( post)}"
+        android:padding="5dp">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tvPostTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/tvPostView"
+            android:padding="4dp"
+            android:text="@{PostBindingUtils.capitalize(post.title)}"
+            android:textColor="@color/colorPrimary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tvPostBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvPostTitle"
+            android:padding="4dp"
+            android:text="@{post.body}"
+            android:textSize="10sp" />
+
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tvPostView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/tvPostBody"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/tvPostTitle"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            android:text="@{Long.toString(post.views)}"
+            android:textSize="16sp" />
+
+
+    </RelativeLayout>
+
+</layout>

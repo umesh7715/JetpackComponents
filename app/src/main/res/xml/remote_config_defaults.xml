@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><!-- START xml_defaults -->
+<defaultsMap>
+    <entry>
+        <key>post_list_fragment_adapter_layout_id</key>
+        <value>post_list_row</value>
+    </entry>
+
+
+</defaultsMap>

@@ -1,5 +1,6 @@
 package com.boisneyphilippe.githubarchitecturecomponents.di.module;
 
+import com.boisneyphilippe.githubarchitecturecomponents.fragments.GithubRespositorySearchFragment;
 import com.boisneyphilippe.githubarchitecturecomponents.fragments.PostListFragment;
 import com.boisneyphilippe.githubarchitecturecomponents.fragments.UserProfileFragment;
 
@@ -18,4 +19,7 @@ public abstract class FragmentModule {
 
     @ContributesAndroidInjector
     abstract PostListFragment contributePostListFragmentFragment();
+
+    @ContributesAndroidInjector
+    abstract GithubRespositorySearchFragment contributeGithubSearchResultFragmentFragment();
 }

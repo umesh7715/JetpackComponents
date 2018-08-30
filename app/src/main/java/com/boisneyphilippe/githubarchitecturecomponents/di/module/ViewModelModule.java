@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 
 import com.boisneyphilippe.githubarchitecturecomponents.di.key.ViewModelKey;
 import com.boisneyphilippe.githubarchitecturecomponents.view_models.FactoryViewModel;
+import com.boisneyphilippe.githubarchitecturecomponents.view_models.GithubViewModel;
 import com.boisneyphilippe.githubarchitecturecomponents.view_models.PostListViewModel;
 import com.boisneyphilippe.githubarchitecturecomponents.view_models.UserProfileViewModel;
 
@@ -29,6 +30,11 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(PostListViewModel.class)
     abstract ViewModel bindPostListViewModel(PostListViewModel repoViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(GithubViewModel.class)
+    abstract ViewModel bindPostGithubViewModel(GithubViewModel repoViewModel);
 
 
     @Binds
